@@ -1,15 +1,15 @@
-"""Perceptron classifier, including training and evaluation.
+"""Binary classification using a single perceptron.
 
-Input dim: 3
-Output dim: 1
+Given an input vector with 3 features (e.g. [.3, .8, -.5]), predict an output
+of 0 or 1.
 
-Ex:
-Given input vector [.3, .8, -.5], predict an output between 0 and 1.
+For this implementation, features 1 and 2 are inversely correlated with the
+output and feature three is directly correlated with the output. A dataset is
+generated drawing samples from normal distributions centered around positive
+or negative means as appropriate.
 
-Let's suppose that if the first two features are positive and the third feature
-is positive, the output should trend toward 1. We'll further say that the first
-feature should provide more signal about the outcome, which can be done by
-sampling with means farther from zero.
+Through training, the perceptron should learn negative weights for features 1
+and 2 and a positive weight for feature 3.
 """
 
 import numpy as np
@@ -39,9 +39,8 @@ class Perceptron:
         raise NotImplementedError
 
 
-def main():
+def generate_dataset(n_positive, n_negative):
     # Positive samples
-    n_positive = 1000
     feat_1 = np.random.normal(-.8, .3, n_positive)
     feat_2 = np.random.normal(-.2, .1, n_positive)
     feat_3 = np.random.normal(.4, .1, n_positive)
@@ -49,7 +48,6 @@ def main():
     pos_labels = np.ones((n_positive))
 
     # Negative samples
-    n_negative = 1000
     feat_1 = np.random.normal(.5, .3, n_negative)
     feat_2 = np.random.normal(.1, .1, n_negative)
     feat_3 = np.random.normal(.4, .1, n_negative)
@@ -57,6 +55,11 @@ def main():
     neg_labels = np.zeros(n_positive)
     x = np.concat((pos_samples, neg_samples), axis=0)
     y = np.concat((pos_labels, neg_labels), axis=0)
+    return x, y
+
+
+def main():
+    x, y = generate_dataset(n_positive=1000, n_negative=1000)
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=.2, shuffle=True)
 
     perceptron = Perceptron(alpha=.2)
