@@ -29,14 +29,15 @@ class Perceptron:
                 self.weights = self.weights + self.alpha * (y - y_hat) * x
 
     def forward(self, x):
-        x_1 =  np.dot(self.weights, x) + self.bias
+        x_1 = np.dot(self.weights, x) + self.bias
         if x_1 >= 0:
             return 1
         else:
             return -1
-        
+
     def eval(self):
         raise NotImplementedError
+
 
 def main():
     # Positive samples
@@ -60,7 +61,8 @@ def main():
 
     perceptron = Perceptron(alpha=.2)
     perceptron.train(x_train, y_train, 2)
-    #perceptron.eval(x_test, y_test)
+    # perceptron.eval(x_test, y_test)
+
 
 if __name__ == "__main__":
     main()
