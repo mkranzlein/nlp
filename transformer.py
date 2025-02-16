@@ -1,4 +1,11 @@
-"""Encoder-only transformer."""
+"""Encoder-only transformer.
+
+Reference material:
+
+https://nlp.seas.harvard.edu/annotated-transformer
+
+"""
+
 
 class Transformer:
     """
