@@ -20,11 +20,16 @@ class NeuralNetwork(nn.module):
         raise NotImplementedError
 
 
-model = NeuralNetwork()
-model.train()
-
-
 class SimpleNeuralNetwork(nn.module):
     """Neural network using PyTorch abstractions (e.g. `nn.Linear`)."""
     def __init__(self):
         super.__init__()
+
+
+def main():
+    model = NeuralNetwork()
+    model.train()
+
+
+if __name__ == "__main__":
+    main()
