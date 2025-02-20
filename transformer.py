@@ -2,8 +2,7 @@
 
 Reference material:
 
-https://nlp.seas.harvard.edu/annotated-transformer
-
+- https://nlp.seas.harvard.edu/annotated-transformer
 """
 
 
@@ -31,3 +30,14 @@ class Transformer:
 
     def positional_encoding(self):
         raise NotImplementedError
+
+
+# Misc components:
+# Attention mask
+# Dropout
+# Label smoothing
+# Warmup schedule
+# Adam
+# Linear layer
+# RELU
+# Tokenization
