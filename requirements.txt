@@ -1,6 +1,6 @@
 flake8
 jupyter
-kagglehub`
+kagglehub
 numpy
 scikit-learn
 torch
