@@ -7,6 +7,7 @@ from torch import nn
 # - https://machinelearningmastery.com/the-chain-rule-of-calculus-for-univariate-and-multivariate-functions/
 # - https://machinelearningmastery.com/difference-between-backpropagation-and-stochastic-gradient-descent/
 
+
 class NeuralNetwork(nn.module):
     """Neural network with explicitly defined operations."""
     def __init__(self):
