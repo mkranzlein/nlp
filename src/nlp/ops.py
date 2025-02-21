@@ -50,7 +50,7 @@ def matmul(a: list[list], b: list[list]):
     assert a_shape != -1
     b_shape = get_matrix_shape(b)
     assert b_shape != -1
-    # Input dims m x n and n x p and yield and m x p matrix when multiplied
+    # Input matrices with dims m x n and n x p yield m x p matrix
     if a_shape[1] != b_shape[0]:
         raise ValueError(f"Incompatible shapes: {a_shape} and {b_shape}.")
 
