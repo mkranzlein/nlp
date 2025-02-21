@@ -1,5 +1,24 @@
 """Math operations for ML from scratch."""
 
+import math
+
+
+def softmax(z: list):
+    """Performs softmax on a vector z."""
+    denominator = sum([math.exp(z_j) for z_j in z])
+    result = [math.exp(z_i) / denominator for z_i in z]
+    return result
+
+
+def sigmoid(z: float):
+    """Sigmoid—Squishes a value into the range (0,1)."""
+    return 1 / (1 + math.exp(-z))
+
+
+def relu(val):
+    """Identity function for inputs >= 0. 0 for negative inputs."""
+    return max(val, 0)
+
 
 def get_matrix_shape(x: list[list]):
     """Returns the shape of a 2-D matrix represented as a list of lists.
@@ -36,10 +55,14 @@ def matmul(a: list[list], b: list[list]):
         raise ValueError(f"Incompatible shapes: {a_shape} and {b_shape}.")
 
     result = []
+    # Position i,j in the result matrix is the dot product of the ith row of a
+    # and the jth column of matrix b
     for i in range(a_shape[0]):
         result_row = []
         for j in range(b_shape[1]):
             row_i = a[i]
+
+            # Column j is the jth element of each row
             col_j = [row[j] for row in b]
             result_row.append(dot_prod(row_i, col_j))
         result.append(result_row)
