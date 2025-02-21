@@ -22,12 +22,6 @@ class Perceptron:
         self.bias = 1
         self.alpha = alpha
 
-    def train(self, x_train, y_train, epochs):
-        for _ in range(epochs):
-            for x, y in zip(x_train, y_train):
-                y_hat = self.forward(x)
-                self.weights = self.weights + self.alpha * (y - y_hat) * x
-
     def forward(self, x):
         x_1 = np.dot(self.weights, x) + self.bias
         if x_1 >= 0:
@@ -35,8 +29,16 @@ class Perceptron:
         else:
             return -1
 
-    def eval(self):
-        raise NotImplementedError
+
+def train(model, x_train, y_train, epochs):
+    for _ in range(epochs):
+        for x, y in zip(x_train, y_train):
+            y_hat = model.forward(x)
+            model.weights = model.weights + model.alpha * (y - y_hat) * x
+
+
+def eval(self):
+    raise NotImplementedError
 
 
 def generate_dataset(n_positive, n_negative):
