@@ -4,7 +4,7 @@
 
 There's a reason those libraries exist: performance. The goal here is not that.
 It's to understand what's happening at each step, down to each matrix
-mulitiplication, gradient calculation, and parameter update.
+multiplication, gradient calculation, and parameter update.
 
 Some terms:
 X (1, 5): Input matrix (1st dim 1 since we're passing one input at a time)
