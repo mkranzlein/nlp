@@ -1,5 +1,6 @@
 """Math operations for ML from scratch."""
 
+import copy
 import math
 
 
@@ -20,6 +21,19 @@ def relu(val):
     return max(val, 0)
 
 
+def relu_deriv(x: float):
+    """First derivative of ReLU."""
+    return x >= 0
+
+
+def matrix_relu(z: list[list[float]]):
+    """Applies ReLU element by element, returning a new matrix."""
+    result = copy.deepcopy(z)
+    for i, row in enumerate(result):
+        for j, elem in enumerate(row):
+            result[i][j] = relu(elem)
+
+
 def get_matrix_shape(x: list[list]):
     """Returns the shape of a 2-D matrix represented as a list of lists.
 
@@ -32,6 +46,20 @@ def get_matrix_shape(x: list[list]):
         if n_cols != dim_2:
             return -1
     return (dim_1, dim_2)
+
+
+def transpose(x: list[list]):
+    """Returns the transpose of a matrix.
+
+    m x n -> n x m
+    """
+    result = []
+    m = len(x)
+    n = len(x[0])
+    for j in range(n):
+        new_row = [x[i][j] for i in range(m)]
+        result.append(new_row)
+    return result
 
 
 def dot_prod(vec_1: list, vec_2: list):
