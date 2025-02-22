@@ -102,7 +102,7 @@ class FFNN:
         # Some nice math on SLP 151 means d/dZ2 L(Sigmoid(Z2)) = y_hat - y
         # This is a nice simplification that comes from the chain rule applied
         # to binary cross-entropy and then sigmoid.
-        gradients["Z2"] = y_hat - y  # Scalar
+        gradients["Z2"] = y_hat[0] - y[0]  # Scalar
         gradients["W_output"] = []  # (3, 1)
         for i, row in enumerate(self.W_output):
             grad_row = []
