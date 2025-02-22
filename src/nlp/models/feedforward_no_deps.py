@@ -6,7 +6,7 @@ There's a reason those libraries exist: performance. The goal here is not that.
 It's to understand what's happening at each step, down to each matrix
 multiplication, gradient calculation, and parameter update.
 
-Some terms:
+Some terms, with shapes in parentheses:
 X (1, 5): Input matrix (1st dim 1 since we're passing one input at a time)
 y (1,): Vector of binary labels, one for each input sample.
 W_hidden (5, 3): Weight matrix for hidden layer
