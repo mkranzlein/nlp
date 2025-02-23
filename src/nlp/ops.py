@@ -32,6 +32,7 @@ def matrix_relu(z: list[list[float]]):
     for i, row in enumerate(result):
         for j, elem in enumerate(row):
             result[i][j] = relu(elem)
+    return result
 
 
 def get_matrix_shape(x: list[list]):
