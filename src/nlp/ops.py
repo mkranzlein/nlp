@@ -4,66 +4,69 @@ import copy
 import math
 
 
-def softmax(z: list):
+def softmax(z: list[float]) -> list[float]:
     """Performs softmax on a vector z."""
     denominator = sum([math.exp(z_j) for z_j in z])
     result = [math.exp(z_i) / denominator for z_i in z]
     return result
 
 
-def sigmoid(z: float):
+def sigmoid(z: float) -> float:
     """Sigmoid—Squishes a value into the range (0,1)."""
     return 1 / (1 + math.exp(-z))
 
 
-def relu(val):
+def relu(z: float) -> int:
     """Identity function for inputs >= 0. 0 for negative inputs."""
-    return max(val, 0)
+    return max(z, 0)
 
 
-def relu_deriv(x: float):
+def relu_deriv(z: float) -> int:
     """First derivative of ReLU."""
-    return x >= 0
+    if z >= 0:
+        return 1
+    else:
+        return 0
 
 
-def matrix_relu(z: list[list[float]]):
+def matrix_relu(Z: list[list[float]]) -> list[list[int]]:
     """Applies ReLU element by element, returning a new matrix."""
-    result = copy.deepcopy(z)
+    result = copy.deepcopy(Z)
     for i, row in enumerate(result):
         for j, elem in enumerate(row):
             result[i][j] = relu(elem)
     return result
 
 
-def get_matrix_shape(x: list[list]):
+def get_matrix_shape(X: list[list]) -> tuple[int, int]:
     """Returns the shape of a 2-D matrix represented as a list of lists.
 
     Returns -1 if shape is invalid (e.g. rows aren't all the same len).
     """
-    dim_1 = len(x)
-    dim_2 = len(x[0])
-    for row in x:
+    dim_1 = len(X)
+    dim_2 = len(X[0])
+    for row in X:
         n_cols = len(row)
         if n_cols != dim_2:
             return -1
     return (dim_1, dim_2)
 
 
-def transpose(x: list[list]):
-    """Returns the transpose of a matrix.
+def transpose(X: list[list]) -> list[list]:
+    """Returns the transpose of a matrix X.
 
     m x n -> n x m
     """
     result = []
-    m = len(x)
-    n = len(x[0])
+    m = len(X)
+    n = len(X[0])
     for j in range(n):
-        new_row = [x[i][j] for i in range(m)]
+        new_row = [X[i][j] for i in range(m)]
         result.append(new_row)
     return result
 
 
-def dot_prod(vec_1: list, vec_2: list):
+def dot_prod(vec_1: list[float], vec_2: list[float]) -> list[float]:
     """Dot product of two vectors."""
     assert len(vec_1) == len(vec_2)
     result = 0
@@ -72,7 +75,7 @@ def dot_prod(vec_1: list, vec_2: list):
     return result
 
 
-def matmul(a: list[list], b: list[list]):
+def matmul(a: list[list[float]], b: list[list[float]]) -> list[list[float]]:
     """Multiply two 2-D matrices."""
     # Verify shapes are compatible
     a_shape = get_matrix_shape(a)
