@@ -29,6 +29,8 @@ python src/nlp/models/feedforward_no_deps.py
 ## Models
 - ✅ [`models/feedforward_no_deps.py`](src/nlp/models/feedforward_no_deps.py): A working implementation of a feedforward
 neural network built from the ground up, including manual backpropagation, with no third-party dependencies like NumPy or PyTorch.
+    
+    ![](assets/feedforward_no_deps_output.py.png)
 
 - ❔ [`models/perceptron.py`](src/nlp/models/perceptron.py): A (not yet tested) implementation
 of a simple perceptron.
