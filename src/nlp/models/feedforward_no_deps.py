@@ -1,10 +1,10 @@
 """A self-contained feedforward neural network.
 
-- No NumPy, no PyTorch, and matrices are just lists of lists.
+No NumPy, no PyTorch, and matrices are just lists of lists.
 
-There's a reason those libraries exist: performance. The goal here is not that.
-It's to understand what's happening at each step, down to each matrix
-multiplication, gradient calculation, and parameter update.
+NumPy and PyTorch have better performance and add quality of life features.
+The goal here is to understand what's happening at each step, down to each
+matrix multiplication, gradient calculation, and parameter update.
 
 Some terms, with shapes in parentheses:
 X (1, 5): Input matrix (1st dim 1 since we're passing one input at a time)
@@ -20,10 +20,14 @@ y_hat (1,): Vector of binary model predictions for each input
 
 L: Loss function (binary cross-entropy)
 
-Some of the variables above could be expressed as vectors because only one
-input sample is processed at a time in this network. For generalizability, these
-variables are expressed as matrices with capital letters.
+Some variables like X could be a vector instead of a matrix, seeing as this
+implementation was primarily intended to compute forward passes on single input
+samples. However, I implemented most of this network with an eye toward being
+able to accept matrix inputs. This is why there are several matrices that have
+a dim equal to 1.
 
+I try to express matrices as capital letters (e.g `X`) and vectors as
+lowercase (e.g. `y`).
 """
 
 import math
@@ -33,8 +37,14 @@ from nlp.ops import matmul, matrix_relu, relu_deriv, sigmoid, transpose
 
 
 class FFNN:
+    """Feed-forward Neural network.
+
+    - 5 input features
+    - 1 hidden layer with dim 3
+    - 1 output
+    - ReLU applied at hidden layer; sigmoid applied at output
+    """
     def __init__(self):
-        
         self.input_dim = 5
         self.hidden_dim = 3
         # Initialize weights + bias for hidden layer
@@ -48,7 +58,17 @@ class FFNN:
                          for i in range(self.hidden_dim)]
         self.b_output = [random.normalvariate(0, .3)]
 
-    def forward(self, X: list):
+    def forward(self, X: list[list[float]]) -> tuple[float,
+                                                     list[list[float]],
+                                                     list[float]] :
+        """Forward pass through the network.
+
+        Args:
+            X: An input matrix (1, hidden_dim).
+
+        Returns:
+            (y_hat, A1, Z1)
+        """
         # --------------------------- Hidden Layer --------------------------- #
         Z1 = matmul(X, self.W_hidden)  # Shape (1, 5) x (5, 3) -> (1, 3)
         # Add bias
@@ -73,7 +93,7 @@ class FFNN:
         y_hat = sigmoid(Z2[0])
         return y_hat, A1, Z1
 
-    def loss(self, output, y):
+    def loss(self, y_hat: float, y: int) -> float:
         """Binary cross-entropy L.
 
         This implementation is equivalent to the BCE definition:
@@ -88,15 +108,22 @@ class FFNN:
         `math.log(1 - y_hat)` conveys how confident the model is that the
         output is 0. The lower y_hat is, the better performance it has on
         samples where y is 0.
+
+        Args:
+            y_hat: Model output. Scalar.
+            y: Ground truth label for an input sample. Scalar.
+
+        Returns:
+            A scalar loss value.
         """
         if y == 0:
-            return -math.log(1 - output)
+            return -math.log(1 - y_hat)
         elif y == 1:
-            return -math.log(output)
+            return -math.log(y_hat)
         else:
             raise ValueError(f"Invalid y: {y}")
 
-    def calc_gradients(self, X, Z1, A1, y_hat, y):
+    def calc_gradients(self, X, Z1, A1, y_hat, y) -> dict:
         """Calculates the gradients for each parameter in the model.
 
         Read any gradient, like Z2, as \\frac{\\partial{L}}{Z2}.
@@ -135,7 +162,7 @@ class FFNN:
 
         return gradients
 
-    def update_weights(self, gradients, lr):
+    def update_weights(self, gradients: dict, lr: float) -> None:
         """Updates the model's weights based on gradients and learning rate."""
         for i, row in enumerate(self.W_hidden):
             for j, w in enumerate(row):
@@ -152,39 +179,40 @@ class FFNN:
             self.b_output[i] = b - gradients["b_output"][i] * lr
 
 
-def generate_dataset(n_positive, n_negative):
+def generate_dataset(n_pos: int, n_neg: int) -> tuple[list[list[float]],
+                                                      list[float]]:
     num_features = 5
-    means = [-.5, .8, .4, .2, -.9]  # Where to center normal dist for each feature
+    means = [-.5, .8, .4, .2, -.9]  # Where to center each normal dist
     pos_features = []
     neg_features = []
     for i in range(num_features):
         pos_features.append([random.normalvariate(mu=means[i], sigma=.1)
-                             for n in range(n_positive)])
+                             for n in range(n_pos)])
         neg_features.append([random.normalvariate(mu=means[i] * -1, sigma=.1)
-                             for n in range(n_negative)])
+                             for n in range(n_neg)])
 
     X = transpose(pos_features)
     X.extend(transpose(neg_features))
 
-    y = [1] * n_positive + [0] * n_negative
+    y = [1] * n_pos + [0] * n_neg
     return X, y
 
 
-def train(model: FFNN, X, y, epochs: int = 3):
+def train(model: FFNN, X: list[list[float]], y: list[float],
+          epochs: int = 3) -> None:
+    """Trains the feed-forward network for a specified number of epochs."""
     for epoch in range(epochs):
         for input_sample, label in zip(X, y):
             y_hat, A1, Z1 = model.forward([input_sample])
-            gradients = model.calc_gradients([input_sample],
-                                            Z1,
-                                            A1,
-                                            [y_hat],
-                                            [label])
+            gradients = model.calc_gradients([input_sample], Z1, A1,
+                                             [y_hat], [label])
             model.update_weights(gradients, .001)
         print(f"Epoch {epoch} completed:", end=" ")
         evaluate(model, X, y)
 
 
-def evaluate(model, X, y):
+def evaluate(model: FFNN, X: list[list[float]], y: list[float]):
+    """Calculates model accuracy on a labeled dataset."""
     num_correct = 0
     for x, label in zip(X, y):
         y_hat, _, _ = model.forward([x])
@@ -196,3 +224,15 @@ def evaluate(model, X, y):
             num_correct += 1
     print(f"{num_correct} correct out of {len(X)}")
 
+
+def main():
+    random.seed(0)
+    X, y = generate_dataset(100, 100)
+    model = FFNN()
+    print("Initial accuracy: ", end=" ")
+    evaluate(model, X, y)
+    train(model, X, y, epochs=6)
+
+
+if __name__ == "__main__":
+    main()
