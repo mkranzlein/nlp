@@ -60,7 +60,7 @@ class FFNN:
 
     def forward(self, X: list[list[float]]) -> tuple[float,
                                                      list[list[float]],
-                                                     list[float]] :
+                                                     list[float]]:
         """Forward pass through the network.
 
         Args:
@@ -123,12 +123,21 @@ class FFNN:
         else:
             raise ValueError(f"Invalid y: {y}")
 
-    def calc_gradients(self, X, Z1, A1, y_hat, y) -> dict:
+    def calc_gradients(self, X: list[list],
+                       Z1: list[list[float]], A1: list[list[float]],
+                       y_hat: list[float], y: list[int]) -> dict:
         """Calculates the gradients for each parameter in the model.
 
         Read any gradient, like Z2, as \\frac{\\partial{L}}{Z2}.
         `gradients["Z2"]` is "the partial derivative of the loss function
         with respect to Z2."
+
+        Args:
+            X: Input matrix (generally a minibatch, here just 1 sample).
+            Z1: Intermediate result W_hidden * X + b_hidden.
+            A1: Neuron activation ReLU(Z1).
+            y_hat: Sigmoided model logits.
+            y: Ground truth label(s) for X.
         """
 
         # Dict with partial derivatives for all weights and biases
@@ -181,6 +190,17 @@ class FFNN:
 
 def generate_dataset(n_pos: int, n_neg: int) -> tuple[list[list[float]],
                                                       list[float]]:
+    """Generates a dataset of size n, equal to n_pos + n_neg.
+
+    Items in the dataset are 5-dim feature vectors sampled from 5 normal
+    distributions with arbitrary preset means. Negative samples are generated
+    by drawing from distributions with those same means inverted. This is to
+    ensure there's some pattern in the data that the network can learn.
+
+    Returns:
+        X: A matrix of input features with shape (n, num_features)
+        y: A vector of binary labels with shape (n,)
+    """
     num_features = 5
     means = [-.5, .8, .4, .2, -.9]  # Where to center each normal dist
     pos_features = []
