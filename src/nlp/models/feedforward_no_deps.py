@@ -27,26 +27,30 @@ variables are expressed as matrices with capital letters.
 """
 
 import math
+import random
 
 from nlp.ops import matmul, matrix_relu, relu_deriv, sigmoid, transpose
 
 
 class FFNN:
     def __init__(self):
-        self.input_dim = 3
-        self.hidden_dim = 5
+        
+        self.input_dim = 5
+        self.hidden_dim = 3
         # Initialize weights + bias for hidden layer
-        self.W_hidden = None
-        self.b_hidden = None
+        self.W_hidden = [[random.normalvariate(0, .3) for j in range(self.hidden_dim)]
+                         for i in range(self.input_dim)]
+        self.b_hidden = [random.normalvariate(0, .3) for i in range(self.hidden_dim)]
 
         self.output_dim = 1
         # Initialize weights + bias for output layer
-        self.W_output = None
-        self.b_output = None
+        self.W_output = [[random.normalvariate(0, .3) for j in range(self.output_dim)]
+                         for i in range(self.hidden_dim)]
+        self.b_output = [random.normalvariate(0, .3)]
 
     def forward(self, X: list):
         # --------------------------- Hidden Layer --------------------------- #
-        Z1 = matmul(X, self.W_hidden)  # Shape (1, 3) x (3, 5) -> (1, 5)
+        Z1 = matmul(X, self.W_hidden)  # Shape (1, 5) x (5, 3) -> (1, 3)
         # Add bias
         for i, row in enumerate(Z1):
             for j in range(len(row)):
@@ -62,8 +66,12 @@ class FFNN:
         # Matrix -> vector by squeezing dim out (only 1 prediction per input)
         Z2 = Z2[0]
         # Sigmoid activation
-        y_hat = sigmoid(Z2)
-        return y_hat
+        # Doing some hacky indexing here. Sigmoid takes a float, but we treat Z2
+        # as a 1-dim vector and want y_hat to be 1-dim vector as well (ideally).
+        # In theory, these vectors would make it easier to do batched forward
+        # passes, but then I guess sigmoid would need to accept vector inputs.
+        y_hat = sigmoid(Z2[0])
+        return y_hat, A1, Z1
 
     def loss(self, output, y):
         """Binary cross-entropy L.
@@ -88,7 +96,7 @@ class FFNN:
         else:
             raise ValueError(f"Invalid y: {y}")
 
-    def calc_gradient(self, X, Z1, A1, y_hat, y):
+    def calc_gradients(self, X, Z1, A1, y_hat, y):
         """Calculates the gradients for each parameter in the model.
 
         Read any gradient, like Z2, as \\frac{\\partial{L}}{Z2}.
@@ -122,8 +130,8 @@ class FFNN:
                 grad_row.append(gradients["Z2"] * w * relu_deriv(Z1[0][i]))
             gradients["Z1"].append(grad_row)
 
-        gradients["W_hidden"] = matmul(transpose(X), gradients["Z1"])  # (5, 3)
-        gradients["b_hidden"] = [gradients["Z1"] * 1 for i in range(len(self.b_hidden))]  # (1,)
+        gradients["W_hidden"] = matmul(transpose(X), transpose(gradients["Z1"]))  # (5, 3)
+        gradients["b_hidden"] = [gradients["Z1"][i][0] * 1 for i in range(len(self.b_hidden))]  # (1,)
 
         return gradients
 
@@ -144,9 +152,47 @@ class FFNN:
             self.b_output[i] = b - gradients["b_output"][i] * lr
 
 
-def train(model, x_train, y_train):
-    # For each sample
-    # Forward pass
-    # output = model.forward()
-    # gradients =
-    raise NotImplementedError
+def generate_dataset(n_positive, n_negative):
+    num_features = 5
+    means = [-.5, .8, .4, .2, -.9]  # Where to center normal dist for each feature
+    pos_features = []
+    neg_features = []
+    for i in range(num_features):
+        pos_features.append([random.normalvariate(mu=means[i], sigma=.1)
+                             for n in range(n_positive)])
+        neg_features.append([random.normalvariate(mu=means[i] * -1, sigma=.1)
+                             for n in range(n_negative)])
+
+    X = transpose(pos_features)
+    X.extend(transpose(neg_features))
+
+    y = [1] * n_positive + [0] * n_negative
+    return X, y
+
+
+def train(model: FFNN, X, y, epochs: int = 3):
+    for epoch in range(epochs):
+        for input_sample, label in zip(X, y):
+            y_hat, A1, Z1 = model.forward([input_sample])
+            gradients = model.calc_gradients([input_sample],
+                                            Z1,
+                                            A1,
+                                            [y_hat],
+                                            [label])
+            model.update_weights(gradients, .001)
+        print(f"Epoch {epoch} completed:", end=" ")
+        evaluate(model, X, y)
+
+
+def evaluate(model, X, y):
+    num_correct = 0
+    for x, label in zip(X, y):
+        y_hat, _, _ = model.forward([x])
+        if y_hat > .5:
+            pred = 1
+        else:
+            pred = 0
+        if pred == label:
+            num_correct += 1
+    print(f"{num_correct} correct out of {len(X)}")
+
